@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MapRot | Geospatial Surface Analytics & Vision AI Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="app-header">
+    <div class="brand">
+      <div class="logo-icon">🗺️</div>
+      <div class="brand-text">
+        <h1>MapRot</h1>
+        <span class="subtext">Enterprise Geospatial Surface Analytics & Vision AI Platform</span>
+      </div>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-pulse"><span class="pulse-dot"></span> PyTorch 2.0+</span>
+      <span class="badge">U-Net EfficientNet</span>
+      <span class="badge">QGIS / GeoTIFF CRS</span>
+      <span class="badge">Shapely GeoJSON</span>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="dashboard-layout">
+    <!-- Left Sidebar: Controls -->
+    <aside class="control-panel">
+      <!-- Input Source Selector -->
+      <div class="card panel-section">
+        <h2 class="section-title">1. Select Satellite Raster</h2>
+        
+        <div class="tab-group">
+          <button id="tab-sample" class="tab-btn active" onclick="switchSource('sample')">Sample Rasters</button>
+          <button id="tab-upload" class="tab-btn" onclick="switchSource('upload')">Custom Upload</button>
+        </div>
+
+        <!-- Sample List -->
+        <div id="sample-view" class="source-view active">
+          <label class="input-label">Select from benchmark dataset:</label>
+          <select id="sample-select" class="custom-select" onchange="onSampleChange()">
+            <option value="" disabled selected>Loading sample rasters...</option>
+          </select>
+          <div id="sample-info" class="meta-tag-group"></div>
+        </div>
+
+        <!-- Upload Box -->
+        <div id="upload-view" class="source-view">
+          <div class="dropzone" id="dropzone" onclick="document.getElementById('file-input').click()">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+            </svg>
+            <p><strong>Click to browse</strong> or drag & drop</p>
+            <span class="hint">GeoTIFF (.tif), PNG, JPG up to 50MB</span>
+            <input type="file" id="file-input" accept=".tif,.tiff,.png,.jpg,.jpeg" style="display:none" onchange="handleFileSelect(event)">
+          </div>
+          <div id="upload-filename" class="upload-status"></div>
+        </div>
+      </div>
+
+      <!-- Class Selection Prompts -->
+      <div class="card panel-section">
+        <h2 class="section-title">2. Target Land-Cover Classes</h2>
+        <p class="section-desc">Select which surfaces the model should isolate:</p>
+        <div class="class-chips" id="class-chips">
+          <label class="class-chip active" data-class="building">
+            <input type="checkbox" value="building" checked>
+            <span class="chip-color" style="background:#dc322f"></span>
+            <span class="chip-label">Buildings</span>
+          </label>
+          <label class="class-chip active" data-class="woodland">
+            <input type="checkbox" value="woodland" checked>
+            <span class="chip-color" style="background:#2ecc71"></span>
+            <span class="chip-label">Woodland</span>
+          </label>
+          <label class="class-chip active" data-class="water">
+            <input type="checkbox" value="water" checked>
+            <span class="chip-color" style="background:#3498db"></span>
+            <span class="chip-label">Water Bodies</span>
+          </label>
+          <label class="class-chip" data-class="road">
+            <input type="checkbox" value="road">
+            <span class="chip-color" style="background:#f1c40f"></span>
+            <span class="chip-label">Roads</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- AI Power-Ups -->
+      <div class="card panel-section">
+        <h2 class="section-title">3. Vision AI Power-Ups</h2>
+        <label class="toggle-control">
+          <input type="checkbox" id="tta-toggle">
+          <span class="toggle-slider"></span>
+          <div class="toggle-label">
+            <strong>Test-Time Augmentation (TTA)</strong>
+            <span class="hint">4-fold multi-flip ensemble; reduces tile seam artifacts</span>
+          </div>
+        </label>
+      </div>
+
+      <!-- Action Button -->
+      <button id="run-btn" class="primary-btn" onclick="executeSegmentation()">
+        <span class="btn-icon">⚡</span>
+        <span class="btn-text">Run MapRot AI Segmentation</span>
+      </button>
+
+      <!-- GIS Export Section -->
+      <div class="card panel-section" id="export-section" style="display:none">
+        <h2 class="section-title">GIS Vector Export</h2>
+        <p class="section-desc">Download vectorized polygons for QGIS, ArcGIS, or Google Earth:</p>
+        <a id="geojson-download-btn" href="/api/export_geojson" download="maprot_vector_features.geojson" class="secondary-btn">
+          <span>📦 Download GeoJSON Vectors</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Right Workspace: Visual Analytics -->
+    <section class="viewport-panel">
+      <!-- Top Metrics Bar -->
+      <div class="metrics-bar">
+        <div class="metric-card">
+          <span class="metric-title">Inference Speed</span>
+          <span class="metric-value" id="stat-time">-- s</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Total Ground Area</span>
+          <span class="metric-value" id="stat-area">-- ha</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">GIS Polygons</span>
+          <span class="metric-value" id="stat-polygons">--</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Spatial System</span>
+          <span class="metric-value" id="stat-crs">Ready</span>
+        </div>
+      </div>
+
+      <!-- Main Viewer Card -->
+      <div class="card viewer-card">
+        <div class="viewer-header">
+          <div class="viewer-tabs">
+            <button class="view-tab active" onclick="switchView('curtain')">↔ Swipe Curtain</button>
+            <button class="view-tab" onclick="switchView('blend')">Alpha Overlay</button>
+            <button class="view-tab" onclick="switchView('split')">Side-by-Side</button>
+            <button class="view-tab" onclick="switchView('mask')">Raw Mask</button>
+          </div>
+          <div class="opacity-control" id="opacity-container" style="display:none">
+            <span>Overlay Opacity:</span>
+            <input type="range" id="opacity-slider" min="0" max="100" value="50" oninput="updateOpacity(this.value)">
+            <span id="opacity-value">50%</span>
+          </div>
+        </div>
+
+        <div class="viewer-viewport" id="viewport">
+          <!-- Placeholder State -->
+          <div class="placeholder-state" id="placeholder">
+            <div class="pulse-ring"></div>
+            <h3>Ready for Geospatial Surface AI</h3>
+            <p>Select a satellite raster or upload your own, toggle land classes, and click Run.</p>
+          </div>
+
+          <!-- Loading State -->
+          <div class="loading-state" id="loading" style="display:none">
+            <div class="spinner"></div>
+            <h3>Processing High-Resolution Raster...</h3>
+            <p id="loading-msg">Slicing into 512x512 tiles, executing deep neural inference, and vectorizing GIS polygons.</p>
+          </div>
+
+          <!-- Active Displays -->
+          <div class="display-container" id="display-container" style="display:none">
+            <!-- 1. Interactive Curtain / Swipe View -->
+            <div id="view-curtain" class="view-mode active">
+              <div class="curtain-container" id="curtain-box">
+                <img id="curtain-bg" class="curtain-img" src="" alt="Satellite Background">
+                <div class="curtain-overlay" id="curtain-fg-wrap">
+                  <img id="curtain-fg" class="curtain-img" src="" alt="Segmented Foreground">
+                </div>
+                <div class="curtain-handle" id="curtain-handle">
+                  <div class="handle-line"></div>
+                  <div class="handle-circle">↔</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Blend View -->
+            <div id="view-blend" class="view-mode">
+              <div class="canvas-wrapper">
+                <img id="img-blend-base" src="" alt="Satellite Base">
+                <img id="img-blend-mask" src="" alt="Mask Overlay" class="overlay-layer">
+              </div>
+            </div>
+
+            <!-- 3. Split View -->
+            <div id="view-split" class="view-mode">
+              <div class="split-grid">
+                <div class="split-pane">
+                  <h4>Original Satellite Imagery</h4>
+                  <img id="img-split-orig" src="" alt="Satellite">
+                </div>
+                <div class="split-pane">
+                  <h4>MapRot Predicted Mask</h4>
+                  <img id="img-split-mask" src="" alt="Predicted Mask">
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. Raw Mask View -->
+            <div id="view-mask" class="view-mode">
+              <div class="canvas-wrapper">
+                <img id="img-raw-mask" src="" alt="Segmented Mask Only">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Analytics: Real-world Surface Composition Breakdown -->
+      <div class="card analytics-card" id="analytics-card" style="display:none">
+        <div class="analytics-header">
+          <h3 class="section-title">Surface Composition & Real Ground Measurements</h3>
+          <span class="analytics-sub">Calculated via spatial ground resolution</span>
+        </div>
+        <div class="stats-table" id="stats-table"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

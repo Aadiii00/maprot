@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "maprot"
+version = "2.0.0"
+description = "MapRot: Geospatial Surface Analytics & Semantic Segmentation Framework"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+    { name = "MapRot Core Team" }
+]
+keywords = [
+    "deep-learning",
+    "pytorch",
+    "semantic-segmentation",
+    "geospatial",
+    "remote-sensing",
+    "satellite-imagery",
+    "land-cover",
+    "computer-vision"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: GIS"
+]
+dependencies = [
+    "torch>=2.0.0",
+    "torchvision>=0.15.0",
+    "segmentation-models-pytorch>=0.3.3",
+    "albumentations>=1.3.0",
+    "patchify>=0.2.3",
+    "opencv-python>=4.7.0",
+    "pyyaml>=6.0",
+    "tqdm>=4.65.0",
+    "matplotlib>=3.7.0",
+    "numpy>=1.24.0",
+    "scikit-learn>=1.2.0"
+]
+
+[project.scripts]
+maprot = "cli:main"
