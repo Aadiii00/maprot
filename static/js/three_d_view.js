@@ -454,7 +454,8 @@ class MapRot3DViewer {
 
           try {
             const extrudeGeo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-            extrudeGeo.rotateX(Math.PI / 2);
+            // Rotate around -X so extrusion depth rises UPWARDS along +Y from terrain
+            extrudeGeo.rotateX(-Math.PI / 2);
 
             // Architectural Materials: Textured Facade Walls + Varied Realistic Roof
             const roofTex = this.roofTextures[fIndex % this.roofTextures.length];
@@ -473,7 +474,7 @@ class MapRot3DViewer {
 
             const buildingMaterials = [wallMat, roofMat];
             const bMesh = new THREE.Mesh(extrudeGeo, buildingMaterials);
-            bMesh.position.y = 0.4;
+            bMesh.position.y = 0.1;
             bMesh.castShadow = true;
             bMesh.receiveShadow = true;
             bMesh.userData = {
@@ -483,38 +484,14 @@ class MapRot3DViewer {
             };
             this.buildingGroup.add(bMesh);
 
-            // On larger buildings (area > 350 m2), add realistic rooftop utility structures (HVAC/Elevator boxes)
-            if (area > 350) {
-              let cx = 0, cz = 0;
-              exteriorRing.forEach(p => {
-                const { x, z } = mapCoord(p[0], p[1]);
-                cx += x; cz += z;
-              });
-              cx /= exteriorRing.length;
-              cz /= exteriorRing.length;
-
-              const boxW = Math.max(4, Math.sqrt(area) * 0.18);
-              const boxH = Math.max(2.5, estHeight * 0.12);
-              const hvacGeo = new THREE.BoxGeometry(boxW, boxH, boxW * 0.8);
-              const hvacMat = new THREE.MeshStandardMaterial({
-                color: 0x475569, // Metal equipment gray
-                roughness: 0.5,
-                metalness: 0.4,
-              });
-              const hvacMesh = new THREE.Mesh(hvacGeo, hvacMat);
-              hvacMesh.position.set(cx, estHeight + boxH / 2 + 0.4, cz);
-              hvacMesh.castShadow = true;
-              this.buildingGroup.add(hvacMesh);
-            }
-
           } catch (e) {}
 
         } else if (cls === 'water') {
           try {
             const waterGeo = new THREE.ShapeGeometry(shape);
-            waterGeo.rotateX(Math.PI / 2);
+            waterGeo.rotateX(-Math.PI / 2);
             const wMesh = new THREE.Mesh(waterGeo, waterMat);
-            wMesh.position.y = -0.3;
+            wMesh.position.y = 0.05;
             wMesh.receiveShadow = true;
             this.waterGroup.add(wMesh);
             this.waterMeshes.push(wMesh);
@@ -523,9 +500,9 @@ class MapRot3DViewer {
         } else if (cls === 'road') {
           try {
             const roadGeo = new THREE.ShapeGeometry(shape);
-            roadGeo.rotateX(Math.PI / 2);
+            roadGeo.rotateX(-Math.PI / 2);
             const rMesh = new THREE.Mesh(roadGeo, roadMat);
-            rMesh.position.y = 0.15;
+            rMesh.position.y = 0.12;
             rMesh.receiveShadow = true;
             this.roadGroup.add(rMesh);
           } catch (e) {}
