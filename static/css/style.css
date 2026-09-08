@@ -869,3 +869,89 @@ body {
     align-items: flex-start;
   }
 }
+
+/* 3D Loading Overlay */
+.threejs-loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(12, 19, 34, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  z-index: 30;
+  color: #f1f5f9;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.spinner-small {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(56, 189, 248, 0.2);
+  border-top-color: #38bdf8;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Building Inspector Card */
+.building-inspector {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 260px;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  z-index: 25;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.25s ease-out;
+}
+
+.inspector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.inspector-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+.inspector-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.inspector-close:hover {
+  color: #ffffff;
+}
+
+.inspector-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+}
+
+.inspector-body strong {
+  color: #f8fafc;
+}
+

@@ -222,30 +222,52 @@
               </div>
             </div>
 
-            <!-- 5. 3D Digital Twin View (Three.js) -->
+            <!-- 5. 3D Terrain & Structure Viewer (Photorealistic Three.js) -->
             <div id="view-3d" class="view-mode">
               <div id="threejs-container" class="threejs-container"></div>
+              
+              <!-- 3D Scene Loading Overlay -->
+              <div id="threejs-loading" class="threejs-loading-overlay" style="display:none">
+                <div class="spinner-small"></div>
+                <span id="threejs-loading-text">Generating photorealistic 3D scene...</span>
+              </div>
+
+              <!-- 3D HUD Controls -->
               <div class="threejs-hud">
                 <div class="threejs-hud-header">
-                  <span class="threejs-badge">🧊 3D Digital Twin</span>
-                  <span class="threejs-hint">Left-drag: Orbit | Right-drag: Pan | Scroll: Zoom</span>
+                  <span class="threejs-badge">🗺️ 3D Photorealistic View</span>
+                  <span class="threejs-hint">Left: Orbit | Right: Pan | Scroll: Zoom | Click: Fly-To</span>
                 </div>
                 <div class="threejs-hud-controls">
+                  <!-- Time of Day / Sun Angle -->
                   <div class="threejs-ctrl">
-                    <label>Building Height:</label>
-                    <input type="range" id="threejs-height-slider" min="0.5" max="4.0" step="0.25" value="1.5" oninput="update3DHeight(this.value)">
+                    <label>☀️ Sun Time:</label>
+                    <input type="range" id="threejs-time-slider" min="6" max="20" step="0.5" value="14" oninput="on3DTimeChange(this.value)">
+                    <span id="threejs-time-label">14:00</span>
+                  </div>
+
+                  <!-- Building Height Scale -->
+                  <div class="threejs-ctrl">
+                    <label>🏢 Height:</label>
+                    <input type="range" id="threejs-height-slider" min="0.5" max="4.0" step="0.25" value="1.5" oninput="on3DHeightChange(this.value)">
                     <span id="threejs-height-label">1.5x</span>
                   </div>
-                  <div class="threejs-ctrl">
-                    <label>Terrain Relief:</label>
-                    <input type="range" id="threejs-terrain-slider" min="0.0" max="3.0" step="0.2" value="0.8" oninput="update3DTerrain(this.value)">
-                    <span id="threejs-terrain-label">0.8x</span>
-                  </div>
+
+                  <!-- Action Buttons -->
                   <div class="threejs-hud-actions">
-                    <button class="hud-btn" id="wireframe-btn" onclick="toggle3DWireframe()">Wireframe: Off</button>
-                    <button class="hud-btn" onclick="reset3DCamera()">Reset View</button>
+                    <button class="hud-btn" id="wireframe-btn" onclick="on3DToggleWireframe()">Wireframe</button>
+                    <button class="hud-btn" onclick="on3DResetCamera()">Reset View</button>
                   </div>
                 </div>
+              </div>
+
+              <!-- Building Inspection Card -->
+              <div id="building-inspector" class="building-inspector" style="display:none">
+                <div class="inspector-header">
+                  <span class="inspector-title">🏢 Selected Structure</span>
+                  <button class="inspector-close" onclick="close3DInspector()">×</button>
+                </div>
+                <div class="inspector-body" id="inspector-body"></div>
               </div>
             </div>
           </div>
@@ -263,6 +285,8 @@
     </section>
   </main>
 
+  <!-- Three.js Component & Main Application Scripts -->
+  <script src="/static/js/three_d_view.js"></script>
   <script src="/static/js/app.js"></script>
 </body>
 </html>
