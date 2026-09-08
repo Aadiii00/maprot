@@ -237,6 +237,28 @@ def run_segmentation():
     alpha = 0.50
     overlay = ((1 - alpha) * img_norm + alpha * color_norm) * 255.0
 
+    # Extract pixel-space contours for Three.js 3D Digital Twin extrusion
+    contours_3d = []
+    for local_idx, orig_class_idx in enumerate(class_indices):
+        class_name = CONFIG.all_classes[orig_class_idx]
+        if class_name.lower() == "background":
+            continue
+        bin_m = (final_mask == local_idx).astype(np.uint8)
+        cnts, _ = cv2.findContours(bin_m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        for cnt in cnts:
+            area = cv2.contourArea(cnt)
+            if area < 25:
+                continue
+            approx = cv2.approxPolyDP(cnt, epsilon=1.8, closed=True)
+            if len(approx) < 3:
+                continue
+            pts = [[int(pt[0][0]), int(pt[0][1])] for pt in approx]
+            contours_3d.append({
+                "class": class_name,
+                "area": float(area),
+                "points": pts,
+            })
+
     t_elapsed = round(time.time() - t_start, 2)
 
     return jsonify({
@@ -250,6 +272,8 @@ def run_segmentation():
         "selected_classes": active_class_names,
         "stats": coverage_stats,
         "num_polygons": len(LATEST_GEOJSON.get("features", [])),
+        "contours_3d": contours_3d,
+        "geojson": LATEST_GEOJSON,
         "images": {
             "original": array_to_base64_png(image_rgb),
             "mask": array_to_base64_png(color_mask),

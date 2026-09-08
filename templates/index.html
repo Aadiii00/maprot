@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/style.css">
+  <!-- Three.js & OrbitControls for 3D Digital Twin -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body>
   <!-- Header -->
@@ -150,6 +153,7 @@
             <button class="view-tab" onclick="switchView('blend')">Alpha Overlay</button>
             <button class="view-tab" onclick="switchView('split')">Side-by-Side</button>
             <button class="view-tab" onclick="switchView('mask')">Raw Mask</button>
+            <button class="view-tab" onclick="switchView('3d')">🧊 3D Digital Twin</button>
           </div>
           <div class="opacity-control" id="opacity-container" style="display:none">
             <span>Overlay Opacity:</span>
@@ -215,6 +219,33 @@
             <div id="view-mask" class="view-mode">
               <div class="canvas-wrapper">
                 <img id="img-raw-mask" src="" alt="Segmented Mask Only">
+              </div>
+            </div>
+
+            <!-- 5. 3D Digital Twin View (Three.js) -->
+            <div id="view-3d" class="view-mode">
+              <div id="threejs-container" class="threejs-container"></div>
+              <div class="threejs-hud">
+                <div class="threejs-hud-header">
+                  <span class="threejs-badge">🧊 3D Digital Twin</span>
+                  <span class="threejs-hint">Left-drag: Orbit | Right-drag: Pan | Scroll: Zoom</span>
+                </div>
+                <div class="threejs-hud-controls">
+                  <div class="threejs-ctrl">
+                    <label>Building Height:</label>
+                    <input type="range" id="threejs-height-slider" min="0.5" max="4.0" step="0.25" value="1.5" oninput="update3DHeight(this.value)">
+                    <span id="threejs-height-label">1.5x</span>
+                  </div>
+                  <div class="threejs-ctrl">
+                    <label>Terrain Relief:</label>
+                    <input type="range" id="threejs-terrain-slider" min="0.0" max="3.0" step="0.2" value="0.8" oninput="update3DTerrain(this.value)">
+                    <span id="threejs-terrain-label">0.8x</span>
+                  </div>
+                  <div class="threejs-hud-actions">
+                    <button class="hud-btn" id="wireframe-btn" onclick="toggle3DWireframe()">Wireframe: Off</button>
+                    <button class="hud-btn" onclick="reset3DCamera()">Reset View</button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
